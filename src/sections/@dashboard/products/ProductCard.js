@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Link, Typography, Stack } from '@mui/material';
+import { Box, Card, Link, Typography, Stack, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
 // components
 import Label from '../../../components/label';
-import { ColorPreview } from '../../../components/color-utils';
+import Iconify from '../../../components/iconify';
+
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +25,21 @@ ShopProductCard.propTypes = {
 };
 
 export default function ShopProductCard({ product }) {
-  const { name, cover, price, colors, status, priceSale } = product;
+  const { name, price, type, quantity } = product;
+
+  const cover = "/assets/images/products/product_1.jpg"
+
+  const getStatus = (quantity) => {
+    if (quantity === 0) {
+      return 'sold out';
+    } if (quantity === 1) {
+      return 'limited';
+    } 
+    return 'sale';
+  }
+
+  const status = getStatus(quantity);
+
 
   return (
     <Card>
@@ -56,22 +70,32 @@ export default function ShopProductCard({ product }) {
         </Link>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={colors} />
+        
           <Typography variant="subtitle1">
-            <Typography
-              component="span"
-              variant="body1"
-              sx={{
-                color: 'text.disabled',
-                textDecoration: 'line-through',
-              }}
-            >
-              {priceSale && fCurrency(priceSale)}
-            </Typography>
-            &nbsp;
-            {fCurrency(price)}
+            {type}
           </Typography>
+          
+          <Typography variant="subtitle1">
+            {price} DH
+          </Typography>        
+          
         </Stack>
+        <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:shopping-cart-outline" />}>
+        <Link href="#" underline="none" color="inherit">
+                   Add to cart
+                 </Link>
+          </Button>
+        <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:edit-outline" />}>
+        <Link href="#" underline="none" color="inherit">
+                   Edit product
+                 </Link>
+          </Button>
+          
+          <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:trash-2-outline" />}>
+          <Link href="#" underline="none" color="inherit">
+                   Delete product
+                 </Link>
+          </Button>
       </Stack>
     </Card>
   );
