@@ -8,7 +8,7 @@ import useResponsive from '../hooks/useResponsive';
 import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
-import { LoginForm } from '../sections/auth/login';
+import { SignupForm } from '../sections/auth/signup';
 
 // ----------------------------------------------------------------------
 
@@ -40,13 +40,13 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function LoginPage() {
+export default function SignupPage() {
   const mdUp = useResponsive('up', 'md');
 
   return (
     <>
       <Helmet>
-        <title> Login page</title>
+        <title> Sign Up page</title>
       </Helmet>
 
       <StyledRoot>
@@ -61,7 +61,7 @@ export default function LoginPage() {
         {mdUp && (
           <StyledSection>
             <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
-              Hi, Welcome Back
+              Welcome, Friend! 
             </Typography>
             <img src="/assets/illustrations/illustration_login.png" alt="login" />
           </StyledSection>
@@ -70,16 +70,16 @@ export default function LoginPage() {
         <Container maxWidth="sm">
           <StyledContent>
             <Typography variant="h4" gutterBottom>
-              Sign in to your account
+              Create your account
             </Typography>
 
             <Typography variant="body2" sx={{ mb: 5 }}>
-              Don’t have an account? {''}
-              <Link href="/signup" variant="subtitle2">Get started</Link>
+              Already have an account? {''}
+              <Link href="/login" variant="subtitle2">Log in</Link>
             </Typography>
 
 
-            <LoginForm />
+            <SignupForm />
           </StyledContent>
         </Container>
       </StyledRoot>
