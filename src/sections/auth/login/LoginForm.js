@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Link, Stack, IconButton, InputAdornment, TextField, Checkbox } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // components
+import axios from 'axios';
+
 import Iconify from '../../../components/iconify';
 // ----------------------------------------------------------------------
 
@@ -16,8 +18,24 @@ export default function LoginForm() {
     navigate('/dashboard', { replace: true });
   };
 
+  const onSubmit = (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const data = {
+      email: formData.get('email'),
+      password : formData.get('password')
+    }
+    axios.post('http://localhost:8082/v1/auth/login', data)
+    .then(({data}) => {
+      console.log(data.token);
+    })
+
+  }
+
   return (
     <>
+    <form onSubmit={onSubmit}>
       <Stack spacing={3}>
         <TextField name="email" label="Email address" />
 
@@ -35,18 +53,14 @@ export default function LoginForm() {
             ),
           }}
         />
-      </Stack>
-
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }}>
-        <Checkbox name="remember" label="Remember me" />
-        <Link variant="subtitle2" underline="hover">
-          Forgot password?
-        </Link>
-      </Stack>
-
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
+        <LoadingButton fullWidth size="large" type="submit" variant="contained" >
         Login
       </LoadingButton>
+      </Stack>
+      </form>
+
+
+      
     </>
   );
 }

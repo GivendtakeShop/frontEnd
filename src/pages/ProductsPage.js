@@ -4,8 +4,10 @@ import axios  from 'axios';
 // @mui
 import { Container, Stack, Typography, Button, Link} from '@mui/material';
 // components
+import token  from '../secrets/jwtToken';
 import { ProductSort, ProductList, ProductCartWidget, ProductFilterSidebar } from '../sections/@dashboard/products';
 // mock
+
 import PRODUCTS from '../_mock/products';
 
 import Iconify from '../components/iconify';
@@ -17,18 +19,14 @@ import { PRODUCTS_URL } from '../constants/endpoints';
 
 export default function ProductsPage() {
   const [openFilter, setOpenFilter] = useState(false);
-  const [products, setProducts] = useState(PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [filterOptions, setFilterOptions] = useState(undefined);
 
 
   useEffect(() => {
     if(filterOptions === undefined) {
-      axios({
-        method: 'get',
-        url: PRODUCTS_URL
-      })
+      axios.get(PRODUCTS_URL,  { headers: {"Authorization" : `Bearer ${token}`} })
         .then(({data}) => {
-          console.log(data);
           setProducts(data);
         });
     }

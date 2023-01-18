@@ -10,6 +10,7 @@ import {
   Paper,
   Avatar,
   Button,
+  Link,
   Popover,
   Checkbox,
   TableRow,
@@ -38,12 +39,10 @@ import USERLIST from '../_mock/user';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'userName', label: 'Username', alignRight: false },
-  { id: 'email', label: 'Email', alignRight: false },
-  { id: 'address', label: 'Address', alignRight: false },
-  { id: 'role', label: 'Role', alignRight: false },
-  { id: 'gender', label: 'Gender', alignRight: false },
-  { id: 'phone', label: 'Phone', alignRight: false }
+  { id: 'orderdate', label: 'Order Date', alignRight: false },
+  { id: 'status', label: 'Status', alignRight: false },
+  { id: 'totalPrice', label: 'Total Price', alignRight: false },
+  { id: 'genereateBill', label: 'Generate Bill', alignRight: false }
 ];
 
 // ----------------------------------------------------------------------
@@ -72,12 +71,12 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (_order) => _order.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function UserPage() {
+export default function OrderPage() {
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -92,7 +91,7 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [userList, setUserList] = useState([]);
+  const [orderList, setOrderList] = useState([]);
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -148,26 +147,26 @@ export default function UserPage() {
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
   useEffect(()=>{
-    axios.get('http://localhost:8082/v1/users',  { headers: {"Authorization" : `Bearer ${token}`} })
+    axios.get('http://localhost:8082/v1/orders',  { headers: {"Authorization" : `Bearer ${token}`} })
     .then(({data})=>{
-      setUserList(data)
+      setOrderList(data.content)
       console.log(data);
     })
   },[])
-  const filteredUsers = applySortFilter(userList, getComparator(order, orderBy), filterName);
+  const filteredOrders = applySortFilter(orderList, getComparator(order, orderBy), filterName);
 
-  const isNotFound = !filteredUsers.length && !!filterName;
+  const isNotFound = !filteredOrders.length && !!filterName;
 
   return (
     <>
       <Helmet>
-        <title> Users Page</title>
+        <title> Orders Page</title>
       </Helmet>
 
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h3" gutterBottom>
-            Users
+            Orders
           </Typography>
         </Stack>
 
@@ -187,37 +186,40 @@ export default function UserPage() {
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                  {filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     
                 
-                    const { id, userName, address, role, email, gender, phone } = row;
-                    const selectedUser = selected.indexOf(userName) !== -1;
-console.log(role);
-                    return (
-                      <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
+                    const { id, orderDate, status, productOrders } = row;
+                    const selectedOrder = selected.indexOf(id) !== -1;
+                    const totalPrice = productOrders.reduce((acc, p) => acc + p.productQuantity * p.product.price, 0);
+                    console.log(productOrders);
+
+                    return ( 
+                      <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedOrder}>
                         <TableCell padding="checkbox">
-                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, userName)} />
+                          <Checkbox checked={selectedOrder}  />
                         </TableCell>
 
                         <TableCell component="th" scope="row" padding="none">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={userName} src={"avatarUrl"} />
                             <Typography variant="subtitle2" noWrap>
-                              {userName}
+                              {orderDate}
                             </Typography>
                           </Stack>
                         </TableCell>
 
-                        <TableCell align="left">{email}</TableCell>
-
-                        <TableCell align="left">{address}</TableCell>
-
-                        <TableCell align="left">{role === 'ROLE_CLIENT' ? 'Client' : 'Admin'}</TableCell>
 
                         <TableCell align="left">
-                          <Label color={(gender === 'MALE' && 'error') || 'success'}>{gender}</Label>
+                          <Label color={(status === 'DELIVERING' && 'error') || 'success'}>{status}</Label>
                         </TableCell>
-                        <TableCell align="left">{phone}</TableCell>
+                        <TableCell align="left">{totalPrice} DH</TableCell>
+                        <TableCell align="left">
+                            <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="ic:outline-file-download" />}>
+                                <Link href="#" underline="none" color="inherit">
+                                Generate Bill
+                                </Link>
+                            </Button>
+                        </TableCell>
 
                         <TableCell align="right">
                           <IconButton size="large" color="inherit" onClick={handleOpenMenu}>

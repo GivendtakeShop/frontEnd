@@ -1,5 +1,5 @@
 
-const PRODUCTS_URL = "http://localhost:8080/v1/products";
+const PRODUCTS_URL = "http://localhost:8082/v1/products";
 
 
 export {

@@ -27,7 +27,7 @@ ShopProductCard.propTypes = {
 export default function ShopProductCard({ product }) {
   const { name, price, type, quantity } = product;
 
-  const cover = "/assets/images/products/product_1.jpg"
+  const cover = `/assets/images/products/${name.toLowerCase()}.jpg`
 
   const getStatus = (quantity) => {
     if (quantity === 0) {
