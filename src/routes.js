@@ -5,8 +5,8 @@ import SimpleLayout from './layouts/simple';
 //
 import BlogPage from './pages/BlogPage';
 import UserPage from './pages/UserPage';
-import OrderPage from './pages/OrderPage';
 import LoginPage from './pages/LoginPage';
+import OrderPage from './pages/OrderPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';

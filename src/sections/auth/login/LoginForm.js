@@ -29,6 +29,8 @@ export default function LoginForm() {
     axios.post('http://localhost:8082/v1/auth/login', data)
     .then(({data}) => {
       console.log(data.token);
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard', { replace: true });
     })
 
   }

@@ -11,7 +11,7 @@ import showMessage from '../../../utils/log';
 
 // ----------------------------------------------------------------------
 
-export default function AddProductForm() {
+export default function EditProductForm({product}) {
   const navigate = useNavigate();
 
 
@@ -47,7 +47,7 @@ const onSubmit = (event) => {
 
   
   
-  axios.post('http://localhost:8082/v1/products', data ,  { headers: {"Authorization" : `Bearer ${token()}`} })
+  axios.post('http://localhost:8082/v1/products', data ,  { headers: {"Authorization" : `Bearer ${token}`} })
   .then(() => {
     // if(file != null){
     //   axios.post('http://localhost:8082/v1/cover', file ,  { headers: {"Authorization" : `Bearer ${token}`} })
@@ -64,7 +64,7 @@ const onSubmit = (event) => {
 
 }
 
-
+const {name, price, quantity, description, type} = product
 
   return (
     <>
@@ -74,16 +74,16 @@ const onSubmit = (event) => {
         
 
 
-      <TextField name="name" label="Product name" />
+      <TextField name="name" value={name} label="Product name" />
 
       
 
-     <TextField  name="price" label="Price" type="number"  />
+     <TextField  name="price" value={price} label="Price" type="number"  />
 
-      <TextField name="quantity " label="Quantity" type="number"  />
+      <TextField name="quantity" value={quantity} label="Quantity" type="number"  />
         
      
-      <TextField name="description" label="Description" multiline rows={4} />
+      <TextField name="description" value={description} label="Description" multiline rows={4} />
 
       <RadioGroup
     aria-labelledby="demo-radio-buttons-group-label"

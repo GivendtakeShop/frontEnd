@@ -10,10 +10,10 @@ import {
   Paper,
   Avatar,
   Button,
+  Link,
   Popover,
   Checkbox,
   TableRow,
-  Link,
   MenuItem,
   TableBody,
   TableCell,
@@ -25,8 +25,6 @@ import {
 } from '@mui/material';
 // components
 import axios from 'axios';
-import { ToastContainer } from 'react-toastify';
-import showMessage from '../utils/log';
 
 import Label from '../components/label';
 import Iconify from '../components/iconify';
@@ -34,13 +32,13 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import token  from '../secrets/jwtToken';
 
-import { OrderListHead, OrderListToolbar } from '../sections/@dashboard/order';
-
+import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+// mock
+import USERLIST from '../_mock/user';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'id', label: 'Order ID', alignRight: false },
   { id: 'orderdate', label: 'Order Date', alignRight: false },
   { id: 'status', label: 'Status', alignRight: false },
   { id: 'totalPrice', label: 'Total Price', alignRight: false },
@@ -73,14 +71,12 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    console.log(array);
-    console.log(query);
-    return filter(array, (_order,index) => (index+1).toString().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (_order) => _order.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function OrderPage() {
+export default function OrderPage3() {
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -88,24 +84,16 @@ export default function OrderPage() {
   const [order, setOrder] = useState('asc');
 
   const [selected, setSelected] = useState([]);
-  
-  const [selectedIds, setSelectedIds] = useState([]);
 
   const [orderBy, setOrderBy] = useState('name');
 
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
   const [orderList, setOrderList] = useState([]);
 
-
-  const [id, setId] = useState('');
-
-
-  const [refeshOrderList, setRefeshOrderList] = useState(false);
-
   const handleOpenMenu = (event) => {
-    setId(event.currentTarget.id);
     setOpen(event.currentTarget);
   };
 
@@ -121,40 +109,26 @@ export default function OrderPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = orderList.map((n) => n.id);
-      const newSelectedsIds = orderList.map((n) => n.id);
+      const newSelecteds = USERLIST.map((n) => n.name);
       setSelected(newSelecteds);
-      setSelectedIds(newSelectedsIds);
-      console.log(selectedIds);
       return;
     }
-    
     setSelected([]);
-    setSelectedIds([]);
-    
   };
 
-  const handleClick = (event, name,id) => {
+  const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
-    let newSelectedIds = [];
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, name);
-      newSelectedIds = newSelectedIds.concat(selectedIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
-      newSelectedIds = newSelectedIds.concat(selectedIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-      newSelectedIds = newSelectedIds.concat(selectedIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-      newSelectedIds = newSelectedIds.concat(selectedIds.slice(0, selectedIndex), selectedIds.slice(selectedIndex + 1));
     }
     setSelected(newSelected);
-    setSelectedIds(newSelectedIds);
-    console.log(newSelected);
-    console.log(newSelectedIds);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -168,13 +142,12 @@ export default function OrderPage() {
 
   const handleFilterByName = (event) => {
     setPage(0);
-    console.log(event.target.value);
     setFilterName(event.target.value);
   };
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - orderList.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
   useEffect(()=>{
-    axios.get('http://localhost:8082/v1/orders',  { headers: {"Authorization" : `Bearer ${token()}`} })
+    axios.get('http://localhost:8082/v1/orders',  { headers: {"Authorization" : `Bearer ${token}`} })
     .then(({data})=>{
       setOrderList(data.content)
       console.log(data);
@@ -182,15 +155,10 @@ export default function OrderPage() {
   },[])
   const filteredOrders = applySortFilter(orderList, getComparator(order, orderBy), filterName);
 
-
   const isNotFound = !filteredOrders.length && !!filterName;
 
-  const generateBill = (e) => {
-      showMessage('Bill generated successfully. Check your email','success');
-  }
   return (
     <>
-     <ToastContainer />
       <Helmet>
         <title> Orders Page</title>
       </Helmet>
@@ -203,37 +171,34 @@ export default function OrderPage() {
         </Stack>
 
         <Card>
-          <OrderListToolbar setSelectedIds={setSelectedIds} selectedIds={selectedIds} numSelected={selectedIds.length} filterName={filterName} onFilterName={handleFilterByName} 
-           setOpen={setOpen} refeshOrderList={refeshOrderList} setRefeshOrderList={setRefeshOrderList} />
+          
+          {/* <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} /> */}
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table>
-                <OrderListHead
+                <UserListHead
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={orderList.length}
-                  numSelected={selectedIds.length}
+                  rowCount={USERLIST.length}
+                  numSelected={selected.length}
                   onRequestSort={handleRequestSort}
+                  onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  { filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row,index) => {
+                  {filteredOrders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     
                 
                     const { id, orderDate, status, productOrders } = row;
                     const selectedOrder = selected.indexOf(id) !== -1;
                     const totalPrice = productOrders.reduce((acc, p) => acc + p.productQuantity * p.product.price, 0);
                     console.log(productOrders);
-                    return (
+
+                    return ( 
                       <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedOrder}>
-                        
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack direction="row" justifyContent="center" spacing={2}>
-                            <Typography variant="subtitle2" noWrap>
-                              {index+1}
-                            </Typography>
-                          </Stack>
+                        <TableCell padding="checkbox">
+                          <Checkbox checked={selectedOrder}  />
                         </TableCell>
 
                         <TableCell component="th" scope="row" padding="none">
@@ -250,14 +215,18 @@ export default function OrderPage() {
                         </TableCell>
                         <TableCell align="left">{totalPrice} DH</TableCell>
                         <TableCell align="left">
-                            <Button  size="medium" color="inherit" variant="outlined" id={id} startIcon={<Iconify icon="ic:outline-file-download" />}>
-                                <Link href="#" underline="none" color="inherit" onClick={generateBill}>
+                            <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="ic:outline-file-download" />}>
+                                <Link href="#" underline="none" color="inherit">
                                 Generate Bill
                                 </Link>
                             </Button>
                         </TableCell>
 
-                      
+                        <TableCell align="right">
+                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                            <Iconify icon={'eva:more-vertical-fill'} />
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -296,10 +265,9 @@ export default function OrderPage() {
           </Scrollbar>
 
           <TablePagination
-            sx={{ display: 'flex', justifyContent: 'center' }}
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={orderList.length}
+            count={USERLIST.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -307,6 +275,35 @@ export default function OrderPage() {
           />
         </Card>
       </Container>
+
+      <Popover
+        open={Boolean(open)}
+        anchorEl={open}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{
+          sx: {
+            p: 1,
+            width: 140,
+            '& .MuiMenuItem-root': {
+              px: 1,
+              typography: 'body2',
+              borderRadius: 0.75,
+            },
+          },
+        }}
+      >
+        <MenuItem>
+          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
+          Edit
+        </MenuItem>
+
+        <MenuItem sx={{ color: 'error.main' }}>
+          <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
+          Delete
+        </MenuItem>
+      </Popover>
     </>
   );
 }

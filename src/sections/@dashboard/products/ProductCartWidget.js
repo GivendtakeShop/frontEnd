@@ -2,6 +2,8 @@
 import { styled } from '@mui/material/styles';
 import { Badge } from '@mui/material';
 // component
+import { useState } from 'react';
+
 import Iconify from '../../../components/iconify';
 
 // ----------------------------------------------------------------------
@@ -27,9 +29,12 @@ const StyledRoot = styled('div')(({ theme }) => ({
   '&:hover': { opacity: 0.72 },
 }));
 
-// ----------------------------------------------------------------------
+//
 
 export default function CartWidget() {
+
+
+  
   return (
     <StyledRoot>
       <Badge showZero badgeContent={0} color="error" max={99}>

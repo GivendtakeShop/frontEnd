@@ -12,7 +12,7 @@ import { ProductSort, ProductList, ProductCartWidget, ProductFilterSidebar } fro
 import PRODUCTS from '../_mock/products';
 
 import Iconify from '../components/iconify';
-import AddProductForm from '../sections/@dashboard/products/AddProductForm';
+import EditProductForm from '../sections/@dashboard/products/EditProductForm';
 
 
 // ----------------------------------------------------------------------
@@ -40,7 +40,7 @@ const props = {
 
 
 
-export default function AddProductPage() {
+export default function EditProduct({product}) {
   const [openFilter, setOpenFilter] = useState(false);
 
   const handleOpenFilter = () => {
@@ -54,7 +54,7 @@ export default function AddProductPage() {
   return (
     <>
       <Helmet>
-        <title> Add Product Page </title>
+        <title> Edit Product </title>
       </Helmet>
 
       <Container>
@@ -71,7 +71,7 @@ export default function AddProductPage() {
 
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
         <Typography variant="h3" sx={{ mb: 5 }}>
-          New Product
+          Edit Product
         </Typography>
         {/* <Typography variant="h3" sx={{ mb: 5 }}>
         <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} justifyContent="flex-end">
@@ -83,7 +83,7 @@ export default function AddProductPage() {
         </Stack>
         
 
-        <AddProductForm/>
+        <EditProductForm/>
       </Container>
     </>
   );

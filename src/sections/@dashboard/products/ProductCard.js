@@ -3,7 +3,12 @@ import PropTypes from 'prop-types';
 import { Box, Card, Link, Typography, Stack, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 // utils
+import { useNavigate } from 'react-router-dom';
+
+import axios from 'axios';
+import showMessage from '../../../utils/log';
 // components
+import token from '../../../secrets/jwtToken';
 import Label from '../../../components/label';
 import Iconify from '../../../components/iconify';
 
@@ -19,13 +24,28 @@ const StyledProductImg = styled('img')({
 });
 
 // ----------------------------------------------------------------------
+// const UploadImg = () => (
+//   <>
+//     <Upload
+//       listType="picture-card"
+//       defaultFileList={[...fileList]}
+//       status="done"
+//       name='file'
+//     >
+//       <Button icon={<UploadOutlined />}>Upload</Button>
+//     </Upload>
+//   </>
+// );
+//       <UploadImg/>
 
 ShopProductCard.propTypes = {
   product: PropTypes.object,
 };
 
-export default function ShopProductCard({ product }) {
-  const { name, price, type, quantity } = product;
+export default function ShopProductCard({ product, refresh, setRefresh }) {
+  const { id,name, price, type, quantity } = product;
+  console.log(product);
+  const navigate = useNavigate();
 
   const cover = `/assets/images/products/${name.toLowerCase()}.jpg`
 
@@ -39,6 +59,26 @@ export default function ShopProductCard({ product }) {
   }
 
   const status = getStatus(quantity);
+  const deleteProduct = (e) => {
+    axios.delete(`http://localhost:8082/v1/products/${e.target.id}`,  { headers: {"Authorization" : `Bearer ${token()}`} })
+    .then(()=>{
+      setRefresh(!refresh)
+      showMessage('Product deleted successfully', 'success')
+    })
+  }
+  const order = (e) => {
+    const targetId = e.currentTarget.id;
+    const data = {
+      productOrders: [{productId: targetId,productQuantity:1}]
+    }
+    console.log(targetId);
+    axios.post(`http://localhost:8082/v1/orders`, data, { headers: {"Authorization" : `Bearer ${token()}`} })
+    .then(()=>{
+      showMessage('Product ordered successfully', 'success')
+      navigate('/dashboard/order', { replace: true });
+    })
+  }
+
 
 
   return (
@@ -80,9 +120,9 @@ export default function ShopProductCard({ product }) {
           </Typography>        
           
         </Stack>
-        <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:shopping-cart-outline" />}>
+        <Button  size="medium" color="inherit" variant="outlined" id={id} onClick={order} startIcon={<Iconify icon="eva:shopping-cart-outline" />}>
         <Link href="#" underline="none" color="inherit">
-                   Add to cart
+                   Order product
                  </Link>
           </Button>
         <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:edit-outline" />}>
@@ -91,7 +131,7 @@ export default function ShopProductCard({ product }) {
                  </Link>
           </Button>
           
-          <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:trash-2-outline" />}>
+          <Button  size="medium" color="inherit" variant="outlined" startIcon={<Iconify icon="eva:trash-2-outline" />} id={id} onClick={deleteProduct}>
           <Link href="#" underline="none" color="inherit">
                    Delete product
                  </Link>

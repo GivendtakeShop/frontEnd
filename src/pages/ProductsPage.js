@@ -21,18 +21,19 @@ export default function ProductsPage() {
   const [openFilter, setOpenFilter] = useState(false);
   const [products, setProducts] = useState([]);
   const [filterOptions, setFilterOptions] = useState(undefined);
+  const [refresh, setRefresh] = useState(false);
 
 
   useEffect(() => {
     if(filterOptions === undefined) {
-      axios.get(PRODUCTS_URL,  { headers: {"Authorization" : `Bearer ${token}`} })
+      axios.get(PRODUCTS_URL,  { headers: {"Authorization" : `Bearer ${token()}`} })
         .then(({data}) => {
           setProducts(data);
         });
     }
    
     
-    }, [filterOptions]);
+    }, [filterOptions,refresh]);
 
   const handleOpenFilter = () => {
     setOpenFilter(true);
@@ -73,7 +74,7 @@ export default function ProductsPage() {
           </Stack>
         </Stack>
 
-        <ProductList products={products} />
+        <ProductList products={products} refresh={refresh} setRefresh={setRefresh}/>
         <ProductCartWidget />
       </Container>
     </>

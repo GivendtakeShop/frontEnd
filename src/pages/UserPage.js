@@ -24,6 +24,8 @@ import {
 } from '@mui/material';
 // components
 import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import showMessage from '../utils/log';
 
 import Label from '../components/label';
 import Iconify from '../components/iconify';
@@ -72,7 +74,7 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(array, (_user) => _user.userName.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
   return stabilizedThis.map((el) => el[0]);
 }
@@ -85,6 +87,8 @@ export default function UserPage() {
   const [order, setOrder] = useState('asc');
 
   const [selected, setSelected] = useState([]);
+  
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [orderBy, setOrderBy] = useState('name');
 
@@ -94,7 +98,13 @@ export default function UserPage() {
 
   const [userList, setUserList] = useState([]);
 
+  const [id, setId] = useState('');
+
+
+  const [refeshUserList, setRefeshUserList] = useState(false);
+
   const handleOpenMenu = (event) => {
+    setId(event.currentTarget.id);
     setOpen(event.currentTarget);
   };
 
@@ -110,26 +120,40 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = USERLIST.map((n) => n.name);
+      const newSelecteds = userList.map((n) => n.userName);
+      const newSelectedsIds = userList.map((n) => n.id);
       setSelected(newSelecteds);
+      setSelectedIds(newSelectedsIds);
+      console.log(selectedIds);
       return;
     }
+    
     setSelected([]);
+    setSelectedIds([]);
+    
   };
 
-  const handleClick = (event, name) => {
+  const handleClick = (event, name,id) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
+    let newSelectedIds = [];
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, name);
+      newSelectedIds = newSelectedIds.concat(selectedIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
+      newSelectedIds = newSelectedIds.concat(selectedIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
+      newSelectedIds = newSelectedIds.concat(selectedIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+      newSelectedIds = newSelectedIds.concat(selectedIds.slice(0, selectedIndex), selectedIds.slice(selectedIndex + 1));
     }
     setSelected(newSelected);
+    setSelectedIds(newSelectedIds);
+    console.log(newSelected);
+    console.log(newSelectedIds);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -148,18 +172,27 @@ export default function UserPage() {
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
   useEffect(()=>{
-    axios.get('http://localhost:8082/v1/users',  { headers: {"Authorization" : `Bearer ${token}`} })
+    axios.get('http://localhost:8082/v1/users',  { headers: {"Authorization" : `Bearer ${token()}`} })
     .then(({data})=>{
       setUserList(data)
-      console.log(data);
     })
-  },[])
+  },[refeshUserList])
   const filteredUsers = applySortFilter(userList, getComparator(order, orderBy), filterName);
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
+  const deleteUser = () => {
+    axios.delete(`http://localhost:8082/v1/users/${id}`,  { headers: {"Authorization" : `Bearer ${token()}`} })
+    .then(()=>{
+      setOpen(null);
+      setRefeshUserList(!refeshUserList)
+      showMessage('User deleted successfully', 'success')
+    })
+  }
+
   return (
     <>
+     <ToastContainer />
       <Helmet>
         <title> Users Page</title>
       </Helmet>
@@ -172,7 +205,8 @@ export default function UserPage() {
         </Stack>
 
         <Card>
-          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+          <UserListToolbar setSelectedIds={setSelectedIds} selectedIds={selectedIds} numSelected={selectedIds.length} filterName={filterName} onFilterName={handleFilterByName} 
+           setOpen={setOpen} refeshUserList={refeshUserList} setRefeshUserList={setRefeshUserList} />
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
@@ -181,22 +215,21 @@ export default function UserPage() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={USERLIST.length}
-                  numSelected={selected.length}
+                  rowCount={userList.length}
+                  numSelected={selectedIds.length}
                   onRequestSort={handleRequestSort}
                   onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                  { filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     
                 
                     const { id, userName, address, role, email, gender, phone } = row;
-                    const selectedUser = selected.indexOf(userName) !== -1;
-console.log(role);
+                    const selectedUser = selectedIds.indexOf(id) !== -1;
                     return (
                       <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
                         <TableCell padding="checkbox">
-                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, userName)} />
+                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, userName, id)} />
                         </TableCell>
 
                         <TableCell component="th" scope="row" padding="none">
@@ -220,7 +253,7 @@ console.log(role);
                         <TableCell align="left">{phone}</TableCell>
 
                         <TableCell align="right">
-                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                          <IconButton size="large" color="inherit" id={id} onClick={handleOpenMenu}>
                             <Iconify icon={'eva:more-vertical-fill'} />
                           </IconButton>
                         </TableCell>
@@ -262,9 +295,10 @@ console.log(role);
           </Scrollbar>
 
           <TablePagination
+          sx={{ display: 'flex', justifyContent: 'center' }}
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={USERLIST.length}
+            count={userList.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -291,12 +325,8 @@ console.log(role);
           },
         }}
       >
-        <MenuItem>
-          <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
 
-        <MenuItem sx={{ color: 'error.main' }}>
+        <MenuItem sx={{ color: 'error.main' }}  onClick={deleteUser}>
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
           Delete
         </MenuItem>

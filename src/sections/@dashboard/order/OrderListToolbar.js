@@ -37,28 +37,28 @@ const StyledSearch = styled(OutlinedInput)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-UserListToolbar.propTypes = {
+OrderListToolbar.propTypes = {
   numSelected: PropTypes.number,
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
   selectedIds: PropTypes.array,
   setOpen: PropTypes.func,
-  refeshUserList: PropTypes.bool,
-  setRefeshUserList: PropTypes.func
+  refeshOrderList: PropTypes.bool,
+  setRefeshOrderList: PropTypes.func
 };
 
-export default function UserListToolbar({ numSelected, filterName, onFilterName, selectedIds, setOpen, refeshUserList, setRefeshUserList, setSelectedIds }) {
+export default function OrderListToolbar({ numSelected, filterName, onFilterName, selectedIds, setOpen, refeshOrderList, setRefeshOrderList, setSelectedIds }) {
 console.log(token);
 const idsNb = selectedIds.length;
-  const deleteUsers = () => {
+  const deleteOrders = () => {
     selectedIds.forEach((id,index) => {
-      axios.delete(`http://localhost:8082/v1/users/${id}`,  { headers: {"Authorization" : `Bearer ${token}`} })
+      axios.delete(`http://localhost:8082/v1/orders/${id}`,  { headers: {"Authorization" : `Bearer ${token}`} })
       .then(()=>{
       setOpen(null);
       if(index === idsNb-1){
-        setRefeshUserList(!refeshUserList);
+        setRefeshOrderList(!refeshOrderList);
         setSelectedIds([]);
-        showMessage(`User${idsNb>1?'s':''} deleted successfully`,'success');
+        showMessage(`Order${idsNb>1?'s':''} deleted successfully`,'success');
       }
       })
     })
@@ -81,7 +81,7 @@ const idsNb = selectedIds.length;
         <StyledSearch
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search user..."
+          placeholder="Search Order..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
@@ -92,7 +92,7 @@ const idsNb = selectedIds.length;
 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton onClick={deleteUsers}>
+          <IconButton onClick={deleteOrders}>
             <Iconify icon="eva:trash-2-fill" />
           </IconButton>
         </Tooltip>
